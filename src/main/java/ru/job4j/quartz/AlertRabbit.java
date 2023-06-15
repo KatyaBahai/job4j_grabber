@@ -17,7 +17,6 @@ import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
-    private static Connection connection;
 
     public static void main(String[] args) {
         try {
@@ -31,7 +30,7 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(Integer.parseInt(getInterval("rabbit.properties")))
+                    .withIntervalInSeconds(getInterval("rabbit.properties"))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -47,6 +46,7 @@ public class AlertRabbit {
     }
 
     public static Connection getConnection(String path) {
+        Connection connection = null;
         try (InputStream in = new FileInputStream(path)) {
             Properties property = new Properties();
             property.load(in);
@@ -64,13 +64,13 @@ public class AlertRabbit {
         return connection;
     }
 
-    public static String getInterval(String path) {
-        String interval = "";
+    public static int getInterval(String path) {
+        int interval = 0;
         try (InputStream in = AlertRabbit.class.getClassLoader()
                 .getResourceAsStream(path)) {
             Properties properties = new Properties();
             properties.load(in);
-            interval = properties.getProperty("rabbit.interval");
+            interval = Integer.parseInt(properties.getProperty("rabbit.interval"));
         } catch (Exception e) {
             e.printStackTrace();
         }
