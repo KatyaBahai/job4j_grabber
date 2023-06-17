@@ -13,14 +13,12 @@ import java.io.IOException;
 public class HabrCareerParse {
 
     private static final String SOURCE_LINK = "https://career.habr.com";
-
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
+    private static final Integer PAGE_NUMBER = 5;
 
     public static void main(String[] args) throws IOException {
-        int pageNumber = 1;
-        while (pageNumber <= 5) {
-            String pageNumberString = "?page=" + pageNumber;
-            Connection connection = Jsoup.connect(PAGE_LINK + pageNumberString);
+        for (int i = 0; i < PAGE_NUMBER; i++) {
+            Connection connection = Jsoup.connect(String.format("%s?page=%s", PAGE_LINK, i));
             Document document = connection.get();
             Elements rows = document.select(".vacancy-card__inner");
             rows.forEach(row -> {
@@ -34,8 +32,7 @@ public class HabrCareerParse {
                 DateTimeParser dateParser = new HabrCareerDateTimeParser();
                 System.out.printf("%s %s %s%n", vacancyName, link, dateParser.parse(date));
             });
-            System.out.printf("----------%s--------%n", pageNumber);
-            pageNumber++;
+            System.out.println("------------------");
         }
     }
 }
