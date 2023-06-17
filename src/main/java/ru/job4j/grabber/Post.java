@@ -19,13 +19,12 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return Objects.equals(title, post.title)
-                && link.equals(post.link)
-                && Objects.equals(description, post.description);
+        return Objects.equals(id, post.id)
+                && link.equals(post.link);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, link, description);
+        return Objects.hash(id, link);
     }
 }
