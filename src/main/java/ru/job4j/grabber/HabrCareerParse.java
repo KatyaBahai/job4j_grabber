@@ -9,6 +9,8 @@ import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.StringJoiner;
 
 public class HabrCareerParse {
 
@@ -30,9 +32,24 @@ public class HabrCareerParse {
                 Element dateTime = dateElement.child(0);
                 String date = dateTime.attr("datetime");
                 DateTimeParser dateParser = new HabrCareerDateTimeParser();
-                System.out.printf("%s %s %s%n", vacancyName, link, dateParser.parse(date));
+                String description = "";
+                try {
+                    description = retrieveDescription(link);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.printf("%s %s %s%n%s%n", vacancyName, link, dateParser.parse(date), description);
             });
             System.out.println("------------------");
         }
+    }
+
+    private static String retrieveDescription(String link) throws IOException {
+        StringJoiner joiner = new StringJoiner(System.lineSeparator());
+        Connection connection = Jsoup.connect(link);
+        Document document = connection.get();
+        List<String> rows= document.select(".vacancy-description__text").eachText();
+        rows.forEach(joiner::add);
+        return joiner.toString();
     }
 }
