@@ -29,7 +29,21 @@ public class HabrCareerParse implements Parse {
     }
 
 
-    private Post createPost(String vacancyName, String linkString, LocalDateTime created, String description) {
+    private Post createPost(Element row) {
+        Element titleElement = row.select(".vacancy-card__title").first();
+        String vacancyName = titleElement.text();
+        Element linkElement = titleElement.child(0);
+        String linkString = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+        Element dateElement = row.select(".vacancy-card__date").first();
+        Element dateTime = dateElement.child(0);
+        String date = dateTime.attr("datetime");
+        LocalDateTime created = dateTimeParser.parse(date);
+        String description = "";
+        try {
+            description = retrieveDescription(linkString);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return new Post(vacancyName, linkString, created, description);
     }
 
@@ -42,21 +56,7 @@ public class HabrCareerParse implements Parse {
                 Document document = connection.get();
                 Elements rows = document.select(".vacancy-card__inner");
                 rows.forEach(row -> {
-                    Element titleElement = row.select(".vacancy-card__title").first();
-                    String vacancyName = titleElement.text();
-                    Element linkElement = titleElement.child(0);
-                    String linkString = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-                    Element dateElement = row.select(".vacancy-card__date").first();
-                    Element dateTime = dateElement.child(0);
-                    String date = dateTime.attr("datetime");
-                    LocalDateTime created = dateTimeParser.parse(date);
-                    String description = "";
-                    try {
-                        description = retrieveDescription(linkString);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    postList.add(createPost(vacancyName, linkString, created, description));
+                    postList.add(createPost(row));
                 });
                 postList.forEach(System.out::println);
             } catch (IOException e) {
