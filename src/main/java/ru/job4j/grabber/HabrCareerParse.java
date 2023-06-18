@@ -13,10 +13,14 @@ import java.util.List;
 import java.util.StringJoiner;
 
 public class HabrCareerParse {
-
     private static final String SOURCE_LINK = "https://career.habr.com";
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer", SOURCE_LINK);
     private static final Integer PAGE_NUMBER = 5;
+    private final DateTimeParser dateTimeParser;
+
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
 
     public static void main(String[] args) throws IOException {
         for (int i = 0; i < PAGE_NUMBER; i++) {
@@ -45,11 +49,8 @@ public class HabrCareerParse {
     }
 
     private static String retrieveDescription(String link) throws IOException {
-        StringJoiner joiner = new StringJoiner(System.lineSeparator());
         Connection connection = Jsoup.connect(link);
         Document document = connection.get();
-        List<String> rows = document.select(".vacancy-description__text").eachText();
-        rows.forEach(joiner::add);
-        return joiner.toString();
+        return document.select(".vacancy-description__text").text();
     }
 }
