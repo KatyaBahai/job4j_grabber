@@ -48,7 +48,7 @@ public class HabrCareerParse {
         StringJoiner joiner = new StringJoiner(System.lineSeparator());
         Connection connection = Jsoup.connect(link);
         Document document = connection.get();
-        List<String> rows= document.select(".vacancy-description__text").eachText();
+        List<String> rows = document.select(".vacancy-description__text").eachText();
         rows.forEach(joiner::add);
         return joiner.toString();
     }
