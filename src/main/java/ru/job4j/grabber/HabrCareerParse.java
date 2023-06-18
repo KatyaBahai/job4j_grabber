@@ -28,6 +28,11 @@ public class HabrCareerParse implements Parse {
         return document.select(".vacancy-description__text").text();
     }
 
+
+    private Post createPost(String vacancyName, String linkString, LocalDateTime created, String description) {
+        return new Post(vacancyName, linkString, created, description);
+    }
+
     @Override
     public List<Post> list(String link) {
         List<Post> postList = new ArrayList<>();
@@ -51,7 +56,7 @@ public class HabrCareerParse implements Parse {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    postList.add(new Post(vacancyName, linkString, created, description));
+                    postList.add(createPost(vacancyName, linkString, created, description));
                 });
                 postList.forEach(System.out::println);
             } catch (IOException e) {
