@@ -22,7 +22,7 @@ public class HabrCareerParse implements Parse {
         this.dateTimeParser = dateTimeParser;
     }
 
-    private static String retrieveDescription(String link) throws IOException {
+    private String retrieveDescription(String link) throws IOException {
         Connection connection = Jsoup.connect(link);
         Document document = connection.get();
         return document.select(".vacancy-description__text").text();
@@ -51,14 +51,13 @@ public class HabrCareerParse implements Parse {
     public List<Post> list(String link) {
         List<Post> postList = new ArrayList<>();
         for (int i = 0; i < PAGE_NUMBER; i++) {
-            Connection connection = Jsoup.connect(String.format("%s?page=%s", PAGE_LINK, i));
+            Connection connection = Jsoup.connect(String.format("%s?page=%s", link, i));
             try {
                 Document document = connection.get();
                 Elements rows = document.select(".vacancy-card__inner");
                 rows.forEach(row -> {
                     postList.add(createPost(row));
                 });
-                postList.forEach(System.out::println);
             } catch (IOException e) {
                 e.printStackTrace();
             }
