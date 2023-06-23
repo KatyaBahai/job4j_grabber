@@ -47,12 +47,7 @@ public class PsqlStore implements Store {
         try (Statement statement = cnn.createStatement()) {
             ResultSet rslSet = statement.executeQuery("SELECT * FROM post;");
             while (rslSet.next()) {
-                Post post = new Post();
-                post.setId(rslSet.getInt(1));
-                post.setTitle(rslSet.getString(2));
-                post.setLink(rslSet.getString(3));
-                post.setCreated(rslSet.getTimestamp(4).toLocalDateTime());
-                post.setDescription(rslSet.getString(5));
+                Post post = createPost(rslSet);
                 list.add(post);
             }
         } catch (Exception e) {
@@ -69,11 +64,7 @@ public class PsqlStore implements Store {
             statement.setInt(1, id);
             ResultSet rslSet = statement.executeQuery();
             while (rslSet.next()) {
-                post.setId(rslSet.getInt(1));
-                post.setTitle(rslSet.getString(2));
-                post.setLink(rslSet.getString(3));
-                post.setCreated(rslSet.getTimestamp(4).toLocalDateTime());
-                post.setDescription(rslSet.getString(5));
+                post = createPost(rslSet);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,14 +79,38 @@ public class PsqlStore implements Store {
         }
     }
 
-    public static void main(String[] args) {
+    public Post createPost(ResultSet rslSet) throws SQLException {
+        Post post = new Post();
+            post.setId(rslSet.getInt(1));
+            post.setTitle(rslSet.getString(2));
+            post.setLink(rslSet.getString(3));
+            post.setCreated(rslSet.getTimestamp(4).toLocalDateTime());
+            post.setDescription(rslSet.getString(5));
+        return post;
+    }
+
+    public void createTable() {
+        try (Statement statement = cnn.createStatement()) {
+            statement.executeQuery("CREATE TABLE IF NOT EXISTS post (\n"
+                    + "id serial primary key,\n"
+                    + "title text,\n"
+                    + "link text UNIQUE,\n"
+                    + "created timestamp,\n"
+                    + "description text\n"
+                    + ");");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+        public static void main(String[] args) {
         HabrCareerParse parse = new HabrCareerParse(new HabrCareerDateTimeParser());
         List<Post> postList = parse.list("https://career.habr.com/vacancies/java_developer");
         Properties properties = new Properties();
-        postList.forEach(System.out::println);
-        try (FileReader reader = new FileReader("db/liquibase.properties")) {
+        try (FileReader reader = new FileReader("db/app.properties")) {
             properties.load(reader);
             PsqlStore store = new PsqlStore(properties);
+            store.createTable();
             postList.forEach(store::save);
             List<Post> rslList = store.getAll();
             rslList.forEach(System.out::println);
