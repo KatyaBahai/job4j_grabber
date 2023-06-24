@@ -102,21 +102,4 @@ public class PsqlStore implements Store {
             e.printStackTrace();
         }
     }
-
-        public static void main(String[] args) {
-        HabrCareerParse parse = new HabrCareerParse(new HabrCareerDateTimeParser());
-        List<Post> postList = parse.list("https://career.habr.com/vacancies/java_developer");
-        Properties properties = new Properties();
-        try (FileReader reader = new FileReader("db/app.properties")) {
-            properties.load(reader);
-            PsqlStore store = new PsqlStore(properties);
-            store.createTable();
-            postList.forEach(store::save);
-            List<Post> rslList = store.getAll();
-            rslList.forEach(System.out::println);
-            System.out.println(store.findById(1));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
